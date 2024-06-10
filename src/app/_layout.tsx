@@ -26,8 +26,8 @@ export default function Layout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar backgroundColor="#0D0D0D" style='light' />
       <SafeAreaProvider>
+      <StatusBar backgroundColor="#0D0D0D" style='light' />
         {fontsLoaded && <Slot />}
       </SafeAreaProvider>
     </GestureHandlerRootView>

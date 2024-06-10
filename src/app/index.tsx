@@ -1,8 +1,12 @@
 import { Footer } from '@/components/Footer';
 import React from 'react';
-import { FlatList, Image, ScrollView, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, KeyboardAvoidingView, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { clsx } from "clsx"
+import { SelectCharacter } from '@/components/SelectCharacter';
+import { useRef } from "react";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { Message } from '@/components/Message';
 
 const messages = [
   {
@@ -20,20 +24,26 @@ const messages = [
 ]
 
 export default function App() {
-  function renderItem(item: { text: string, isMe: boolean }) {
-    return (
-      <View className={clsx('p-4 w-[80%] rounded-lg', item.isMe ? 'self-end bg-brand-primary' : 'self-start bg-zinc-900 text-white')}>
-        <Text className={item.isMe ? 'text-black' : 'text-white'}>{item.text}</Text>
-      </View>
-    )
+  const bottomSheetRef = useRef<BottomSheet>()
+
+  const handleOpenBottomSheet = () => {
+    bottomSheetRef.current.expand()
   }
 
   return (
     <SafeAreaView className='flex-1 bg-brand-background'>
-      <View className='flex-1 p-2'>
-        <FlatList showsVerticalScrollIndicator={false}  contentContainerStyle={{gap: 24, padding: 20}} renderItem={({ item }) => renderItem(item)} data={messages} />
-      </View>
-      <Footer />
+      <KeyboardAvoidingView className='flex-1' behavior='padding'>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ gap: 24, padding: 20 }}
+          renderItem={({ item }) => <Message content={item.text} isMe={item.isMe} />}
+          data={messages}
+        />
+        <Footer handleOpenBottomSheet={handleOpenBottomSheet}
+        />
+      </KeyboardAvoidingView>
+      <SelectCharacter ref={bottomSheetRef} />
+
     </SafeAreaView>
   );
 }
