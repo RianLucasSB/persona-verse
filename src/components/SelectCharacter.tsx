@@ -5,13 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { ICharacter } from "@/interfaces/character";
 import { CharactersApi } from "@/api/character";
-
-interface Props {
-  onClose: () => void
-}
+import { useCharacterContext } from "@/contexts/character";
 
 export const SelectCharacter = forwardRef<BottomSheet>(({ }, ref) => {
   const [characters, setCharacters] = useState<ICharacter[]>([])
+
+  const { selectCharacter } = useCharacterContext()
 
   const innerRef = useRef<BottomSheet>(null);
   useImperativeHandle(ref, () => innerRef.current!, []);
@@ -30,6 +29,12 @@ export const SelectCharacter = forwardRef<BottomSheet>(({ }, ref) => {
 
   }
 
+  
+  function handleChangeCharacter(character: ICharacter) {
+    selectCharacter(character)
+    handleCloseBottomSheet()
+  }
+
   useEffect(() => {
     fetchCharacters()
   }, [])
@@ -45,15 +50,15 @@ export const SelectCharacter = forwardRef<BottomSheet>(({ }, ref) => {
           <Ionicons name="close" size={32} color="#fff" />
         </Pressable>
         <BottomSheetFlatList
-          columnWrapperStyle={{ justifyContent: "space-between" }}
+          columnWrapperStyle={{ gap: 50 }}
           contentContainerStyle={{ width: '100%', gap: 50 }}
-          numColumns={3}
           data={characters}
+          numColumns={3}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => {
             return (
               <View className="items-center gap-2">
-                <Pressable key={item.id} onPress={() => { }} className='rounded-full overflow-hidden items-center justify-center'>
+                <Pressable key={item.id} onPress={() => handleChangeCharacter(item)} className='rounded-full overflow-hidden items-center justify-center'>
                   <Image className='bg-brand-primary h-24 w-24 object-cover' source={{ uri: item.imageUrl }} />
                 </Pressable>
                 <Text className="text-white">{item.name}</Text>

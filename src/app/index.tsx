@@ -7,28 +7,20 @@ import { SelectCharacter } from '@/components/SelectCharacter';
 import { useRef } from "react";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Message } from '@/components/Message';
+import { useChatStore } from '@/stores/chat';
+import { useCharacterContext } from '@/contexts/character';
 
-const messages = [
-  {
-    text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus laboriosam accusantium repellat sint ducimus nobis cupiditate at quo aperiam molestiae possimus ut ipsum enim, fugiat illum modi! Non, consequatur dicta.",
-    isMe: true
-  },
-  {
-    text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus laboriosam accusantium repellat sint ducimus nobis cupiditate at quo aperiam molestiae possimus ut ipsum enim, fugiat illum modi! Non, consequatur dicta.",
-    isMe: false
-  },
-  {
-    text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus laboriosam accusantium repellat sint ducimus nobis cupiditate at quo aperiam molestiae possimus ut ipsum enim, fugiat illum modi! Non, consequatur dicta.",
-    isMe: true
-  },
-]
 
 export default function App() {
+  const { chats } = useChatStore()
+  const { selectedCharacter } = useCharacterContext()
   const bottomSheetRef = useRef<BottomSheet>()
 
   const handleOpenBottomSheet = () => {
     bottomSheetRef.current.expand()
   }
+
+  const messages = chats.find(chat => chat.characterId === selectedCharacter.id)?.messages ?? []
 
   return (
     <SafeAreaView className='flex-1 bg-brand-background'>
@@ -36,7 +28,7 @@ export default function App() {
         <FlatList
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ gap: 24, padding: 20 }}
-          renderItem={({ item }) => <Message content={item.text} isMe={item.isMe} />}
+          renderItem={({ item }) => <Message content={item.content} isMe={item.fromUser} />}
           data={messages}
         />
         <Footer handleOpenBottomSheet={handleOpenBottomSheet}

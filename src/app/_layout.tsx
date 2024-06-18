@@ -10,6 +10,7 @@ import {
   Roboto_700Bold,
 } from "@expo-google-fonts/roboto"
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
+import { CharacterContextProvider } from "@/contexts/character"
 
 SplashScreen.preventAutoHideAsync()
 
@@ -27,8 +28,10 @@ export default function Layout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-      <StatusBar backgroundColor="#0D0D0D" style='light' />
-        {fontsLoaded && <Slot />}
+        <StatusBar backgroundColor="#0D0D0D" style='light' />
+        <CharacterContextProvider>
+          {fontsLoaded && <Slot />}
+        </CharacterContextProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   )
