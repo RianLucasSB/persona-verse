@@ -7,8 +7,14 @@ export const CharactersApi = {
     const { data } = await http.get<ICharacter[]>("/characters")
     return data
   },
-  ask: async () => {
-    const { data } = await http.post<IMessage>("/characters")
+  ask: async (characterId: number, message: string) => {
+    const { data } = await http.post<AskQuestionResponse>(`/ask/${characterId}`, {
+      question: message
+    })
     return data
   },
+}
+
+interface AskQuestionResponse {
+  answer: string;
 }

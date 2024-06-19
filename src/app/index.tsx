@@ -1,6 +1,6 @@
 import { Footer } from '@/components/Footer';
-import React from 'react';
-import { FlatList, Image, KeyboardAvoidingView, ScrollView, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { clsx } from "clsx"
 import { SelectCharacter } from '@/components/SelectCharacter';
@@ -15,23 +15,33 @@ export default function App() {
   const { chats } = useChatStore()
   const { selectedCharacter } = useCharacterContext()
   const bottomSheetRef = useRef<BottomSheet>()
+  const flatListRef = useRef<FlatList>()
 
   const handleOpenBottomSheet = () => {
     bottomSheetRef.current.expand()
   }
 
+
   const messages = chats.find(chat => chat.characterId === selectedCharacter.id)?.messages ?? []
+
+  useEffect(() => {
+    setTimeout(() => {
+      flatListRef.current!.scrollToEnd({ animated: true });
+    }, 300);
+  }, []);
 
   return (
     <SafeAreaView className='flex-1 bg-brand-background'>
-      <KeyboardAvoidingView className='flex-1' behavior='padding'>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ gap: 24, padding: 20 }}
-          renderItem={({ item }) => <Message content={item.content} isMe={item.fromUser} />}
-          data={messages}
-        />
-        <Footer handleOpenBottomSheet={handleOpenBottomSheet}
+      <FlatList
+        ref={flatListRef}
+        automaticallyAdjustKeyboardInsets
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ gap: 24, padding: 20 }}
+        renderItem={({ item }) => <Message content={item.content} isMe={item.fromUser} />}
+        data={messages}
+      />
+      <KeyboardAvoidingView  behavior={Platform.OS === 'ios' ? 'padding' : 'height'} keyboardVerticalOffset={100}>
+        <Footer flatListRef={flatListRef} handleOpenBottomSheet={handleOpenBottomSheet}
         />
       </KeyboardAvoidingView>
       <SelectCharacter ref={bottomSheetRef} />

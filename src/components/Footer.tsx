@@ -1,28 +1,43 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { FlatList, Image, Keyboard, Pressable, Text, View } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import { Ionicons } from '@expo/vector-icons';
 import { useCharacterContext } from "@/contexts/character";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChatStore } from "@/stores/chat";
+import { CharactersApi } from "@/api/character";
 
 interface Props {
   handleOpenBottomSheet: () => void
+  flatListRef: React.MutableRefObject<FlatList<any>>
 }
 
 
-export function Footer({ handleOpenBottomSheet }: Props) {
+export function Footer({ handleOpenBottomSheet, flatListRef }: Props) {
   const { selectedCharacter } = useCharacterContext()
   const { pushMessage } = useChatStore()
 
   const [text, setText] = useState('')
 
-  function sendMessage() {
-    pushMessage(selectedCharacter.id, {content: text, createdAt: new Date(), fromUser: true})
+  async function sendMessage() {
+    pushMessage(selectedCharacter.id, { content: text, createdAt: new Date(), fromUser: true })
+    Keyboard.dismiss()
+    setText('')
+    try {
+      const data = await CharactersApi.ask(selectedCharacter.id, text);
+
+      pushMessage(selectedCharacter.id, { content: data.answer, createdAt: new Date(), fromUser: false })
+      setTimeout(() => {
+        flatListRef.current!.scrollToEnd({ animated: true });
+      }, 300);
+    } catch (error) {
+      console.log(error)
+    }
+
   }
 
 
   return (
-    <View className={`flex-row w-full p-4 items-center  space-x-4 ${selectedCharacter ? 'justify-between' : 'justify-center'}`}>
+    <View className={`flex-row w-full p-4 items-center bg-gray-900/10  space-x-4 ${selectedCharacter ? 'justify-between' : 'justify-center'}`}>
       {selectedCharacter ? (
         <>
           <Pressable
@@ -31,12 +46,16 @@ export function Footer({ handleOpenBottomSheet }: Props) {
           >
             <Image className='bg-brand-primary h-14 w-14' source={{ uri: selectedCharacter.imageUrl }} />
           </Pressable>
-          <View className='flex-1 flex-row items-center justify-between h-14 bg-zinc-200 rounded-full p-4'>
-            <TextInput value={text} onChangeText={setText} className='' placeholder='Digite sua mensagem' />
-            <Pressable onPress={sendMessage}>
-              <Ionicons name="send-sharp" size={28} color="#5005F2" />
-            </Pressable>
-          </View>
+          <TextInput
+            multiline={true}
+            value={text}
+            onChangeText={setText}
+            className='min-h-10 w-64 p-4 bg-white rounded-md'
+            placeholder='Digite sua mensagem'
+          />
+          <Pressable onPress={sendMessage}>
+            <Ionicons name="send-sharp" size={28} color="#5005F2" />
+          </Pressable>
         </>
       ) : (
         <Pressable
